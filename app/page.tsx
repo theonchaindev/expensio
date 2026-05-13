@@ -41,9 +41,11 @@ export default function Home() {
           </Link>
         </div>
 
-        <p className="text-center text-slate-600 text-xs">
-          Secure expense management for modern teams
-        </p>
+        <div className="text-center">
+          <Link href="/test-login" className="text-slate-500 hover:text-slate-300 text-xs underline underline-offset-2 transition-colors">
+            Test Login
+          </Link>
+        </div>
       </div>
     </div>
   );
