@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Company {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  logoUrl        String?
+  primaryColor   String   @default("#2563EB")
+  secondaryColor String   @default("#1E40AF")
+  accentColor    String   @default("#EFF6FF")
+  textOnPrimary  String   @default("#FFFFFF")
+  address        String?
+  website        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  admins     Admin[]
+  users      User[]
+  expenses   Expense[]
+  categories ExpenseCategory[]
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  companyId    String
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id           String   @id @default(cuid())
+  companyId    String
+  email        String
+  passwordHash String
+  name         String
+  role         String   @default("EMPLOYEE")
+  department   String?
+  jobTitle     String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses Expense[] @relation("SubmittedBy")
+  reviewed Expense[] @relation("ReviewedBy")
+
+  @@unique([email, companyId])
+}
+
+model Expense {
+  id           String   @id @default(cuid())
+  companyId    String
+  userId       String
+  title        String
+  description  String?
+  amount       Float
+  currency     String   @default("GBP")
+  category     String
+  receiptUrl   String?
+  status       String   @default("PENDING")
+  submittedAt  DateTime @default(now())
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNotes  String?
+  paidAt       DateTime?
+
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user       User    @relation("SubmittedBy", fields: [userId], references: [id])
+  reviewedBy User?   @relation("ReviewedBy", fields: [reviewedById], references: [id])
+}
+
+model ExpenseCategory {
+  id        String @id @default(cuid())
+  companyId String
+  name      String
+  limitGbp  Float?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([name, companyId])
+}
