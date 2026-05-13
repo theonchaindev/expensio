@@ -62,7 +62,7 @@ export default function AppShell({
         {/* Top header */}
         <header
           className="sticky top-0 z-40 shadow-sm"
-          style={{ backgroundColor: theme.primaryColor }}
+          style={{ backgroundColor: "#263469" }}
         >
           <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
