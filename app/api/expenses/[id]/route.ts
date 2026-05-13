@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getEmployeeSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isDemoSession, DEMO_EXPENSES } from "@/lib/demoData";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getEmployeeSession();
@@ -14,6 +15,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Invalid status" }, { status: 400 });
   }
 
+  if (isDemoSession(session.companyId)) {
+    const expense = DEMO_EXPENSES.find((e) => e.id === id);
+    if (!expense) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ ...expense, status, reviewNotes, reviewedAt: new Date() });
+  }
+
   const expense = await prisma.expense.findFirst({
     where: { id, companyId: session.companyId },
   });
@@ -22,12 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const updated = await prisma.expense.update({
     where: { id },
-    data: {
-      status,
-      reviewedById: session.userId,
-      reviewedAt: new Date(),
-      reviewNotes,
-    },
+    data: { status, reviewedById: session.userId, reviewedAt: new Date(), reviewNotes },
   });
 
   return NextResponse.json(updated);

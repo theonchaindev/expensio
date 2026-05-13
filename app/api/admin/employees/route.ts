@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isDemoSession, DEMO_EMPLOYEES } from "@/lib/demoData";
 import bcrypt from "bcryptjs";
 
 export async function GET() {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  if (isDemoSession(session.companyId)) {
+    return NextResponse.json(DEMO_EMPLOYEES);
+  }
 
   const employees = await prisma.user.findMany({
     where: { companyId: session.companyId },
@@ -19,6 +24,10 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await getAdminSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  if (isDemoSession(session.companyId)) {
+    return NextResponse.json({ error: "Demo mode — employees cannot be added" }, { status: 403 });
+  }
 
   const { name, email, password, role, department, jobTitle } = await req.json();
   if (!name || !email || !password) {

@@ -3,19 +3,25 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { PlusCircle, Clock, CheckCircle, XCircle, Banknote } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { isDemoSession, DEMO_EXPENSES } from "@/lib/demoData";
 
 export default async function DashboardPage() {
   const session = await getEmployeeSession();
   if (!session) return null;
 
-  let expenses: Awaited<ReturnType<typeof prisma.expense.findMany>> = [];
-  try {
-    expenses = await prisma.expense.findMany({
-      where: { userId: session.userId },
-      orderBy: { submittedAt: "desc" },
-      take: 5,
-    });
-  } catch {}
+  let expenses: { id: string; title: string; amount: number; status: string; category: string; submittedAt: Date }[] = [];
+
+  if (isDemoSession(session.companyId)) {
+    expenses = DEMO_EXPENSES.filter((e) => e.userId === "demo-user").slice(0, 5);
+  } else {
+    try {
+      expenses = await prisma.expense.findMany({
+        where: { userId: session.userId },
+        orderBy: { submittedAt: "desc" },
+        take: 5,
+      });
+    } catch {}
+  }
 
   const stats = {
     pending: expenses.filter((e) => e.status === "PENDING").length,
@@ -34,15 +40,14 @@ export default async function DashboardPage() {
         <p className="text-gray-500 text-sm mt-1">{session.role === "MANAGER" ? "Manager" : "Employee"}</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         {[
           { label: "Pending", value: stats.pending, icon: Clock, color: "text-amber-600 bg-amber-50" },
           { label: "Approved", value: stats.approved, icon: CheckCircle, color: "text-green-600 bg-green-50" },
           { label: "Paid Out", value: stats.paid, icon: Banknote, color: "text-blue-600 bg-blue-50" },
-          { label: "Total Claimed", value: fmt(stats.total), icon: XCircle, color: "text-purple-600 bg-purple-50", wide: true },
+          { label: "Total Claimed", value: fmt(stats.total), icon: XCircle, color: "text-purple-600 bg-purple-50" },
         ].map((s) => (
-          <div key={s.label} className={`bg-white rounded-2xl p-4 shadow-sm ${s.wide ? "" : ""}`}>
+          <div key={s.label} className="bg-white rounded-2xl p-4 shadow-sm">
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-2 ${s.color}`}>
               <s.icon className="w-5 h-5" />
             </div>
@@ -52,7 +57,6 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Quick action */}
       <Link
         href="/expenses/new"
         className="flex items-center gap-3 w-full rounded-2xl p-4 text-white shadow-md hover:opacity-90 transition-opacity"
@@ -65,7 +69,6 @@ export default async function DashboardPage() {
         </div>
       </Link>
 
-      {/* Recent expenses */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-gray-900">Recent Expenses</h2>
@@ -73,7 +76,6 @@ export default async function DashboardPage() {
             View all
           </Link>
         </div>
-
         <div className="space-y-2">
           {expenses.length === 0 ? (
             <div className="text-center py-10 text-gray-400 bg-white rounded-2xl">

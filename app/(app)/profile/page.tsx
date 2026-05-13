@@ -1,30 +1,52 @@
 import { getEmployeeSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { LogOut, User } from "lucide-react";
 import LogoutButton from "@/components/LogoutButton";
+import { isDemoSession, DEMO_EXPENSES, DEMO_EMPLOYEES } from "@/lib/demoData";
 
 export default async function ProfilePage() {
   const session = await getEmployeeSession();
   if (!session) return null;
 
-  const [user, stats] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: session.userId },
-      select: { name: true, email: true, role: true, department: true, jobTitle: true, createdAt: true },
-    }).catch(() => null),
-    prisma.expense.groupBy({
-      by: ["status"],
-      where: { userId: session.userId },
-      _count: true,
-      _sum: { amount: true },
-    }).catch(() => []),
-  ]);
+  type UserData = { name: string; email: string; role: string; department?: string | null; jobTitle?: string | null; createdAt: Date } | null;
+  type StatRow = { status: string; _count: number; _sum: { amount: number | null } };
+
+  let user: UserData = null;
+  let stats: StatRow[] = [];
+
+  if (isDemoSession(session.companyId)) {
+    const demoUser = DEMO_EMPLOYEES.find((e) => e.id === "demo-user")!;
+    user = { name: demoUser.name, email: demoUser.email, role: demoUser.role, department: demoUser.department, jobTitle: demoUser.jobTitle, createdAt: demoUser.createdAt };
+    const myExpenses = DEMO_EXPENSES.filter((e) => e.userId === "demo-user");
+    const grouped: Record<string, { count: number; sum: number }> = {};
+    for (const e of myExpenses) {
+      if (!grouped[e.status]) grouped[e.status] = { count: 0, sum: 0 };
+      grouped[e.status].count++;
+      grouped[e.status].sum += e.amount;
+    }
+    stats = Object.entries(grouped).map(([status, { count, sum }]) => ({ status, _count: count, _sum: { amount: sum } }));
+  } else {
+    [user, stats] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: session.userId },
+        select: { name: true, email: true, role: true, department: true, jobTitle: true, createdAt: true },
+      }).catch(() => null),
+      prisma.expense.groupBy({
+        by: ["status"],
+        where: { userId: session.userId },
+        _count: true,
+        _sum: { amount: true },
+      }).catch(() => []),
+    ]);
+  }
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(n);
 
   const paid = stats.find((s) => s.status === "PAID");
   const approved = stats.find((s) => s.status === "APPROVED");
+  const displayName = user?.name ?? session.name;
+  const displayEmail = user?.email ?? session.email;
+  const displayRole = user?.role ?? session.role;
 
   return (
     <div className="space-y-5">
@@ -36,13 +58,13 @@ export default async function ProfilePage() {
             className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold text-white"
             style={{ backgroundColor: "var(--brand-primary)" }}
           >
-            {(user?.name ?? session.name).charAt(0)}
+            {displayName.charAt(0)}
           </div>
           <div>
-            <p className="font-bold text-gray-900 text-lg">{user?.name ?? session.name}</p>
-            <p className="text-gray-500 text-sm">{user?.email ?? session.email}</p>
+            <p className="font-bold text-gray-900 text-lg">{displayName}</p>
+            <p className="text-gray-500 text-sm">{displayEmail}</p>
             <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-              {(user?.role ?? session.role) === "MANAGER" ? "Manager" : "Employee"}
+              {displayRole === "MANAGER" ? "Manager" : "Employee"}
             </span>
           </div>
         </div>
