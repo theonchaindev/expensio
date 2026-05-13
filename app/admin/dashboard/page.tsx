@@ -26,7 +26,6 @@ export default async function AdminDashboardPage() {
       include: { user: { select: { name: true } } },
       orderBy: { submittedAt: "desc" },
       take: 8,
-      include: { user: { select: { name: true } } },
     }).catch(() => []),
   ]);
 
