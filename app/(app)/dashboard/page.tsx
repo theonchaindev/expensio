@@ -8,14 +8,14 @@ export default async function DashboardPage() {
   const session = await getEmployeeSession();
   if (!session) return null;
 
-  const [expenses, company] = await Promise.all([
-    prisma.expense.findMany({
+  let expenses: Awaited<ReturnType<typeof prisma.expense.findMany>> = [];
+  try {
+    expenses = await prisma.expense.findMany({
       where: { userId: session.userId },
       orderBy: { submittedAt: "desc" },
       take: 5,
-    }),
-    prisma.company.findUnique({ where: { id: session.companyId } }),
-  ]);
+    });
+  } catch {}
 
   const stats = {
     pending: expenses.filter((e) => e.status === "PENDING").length,

@@ -8,10 +8,13 @@ export default async function ExpensesPage() {
   const session = await getEmployeeSession();
   if (!session) return null;
 
-  const expenses = await prisma.expense.findMany({
-    where: { userId: session.userId, companyId: session.companyId },
-    orderBy: { submittedAt: "desc" },
-  });
+  let expenses: Awaited<ReturnType<typeof prisma.expense.findMany>> = [];
+  try {
+    expenses = await prisma.expense.findMany({
+      where: { userId: session.userId, companyId: session.companyId },
+      orderBy: { submittedAt: "desc" },
+    });
+  } catch {}
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(n);

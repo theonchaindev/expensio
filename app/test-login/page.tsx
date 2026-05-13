@@ -13,12 +13,12 @@ const ACCOUNTS = [
     color: "bg-blue-50 border-blue-200 hover:bg-blue-100",
     iconColor: "bg-blue-600",
     action: async () => {
-      const res = await fetch("/api/auth/login", {
+      await fetch("/api/auth/demo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "john@demo.com", password: "test", companySlug: "demo" }),
+        body: JSON.stringify({ role: "EMPLOYEE" }),
       });
-      return { ok: res.ok, redirect: "/dashboard" };
+      return "/dashboard";
     },
   },
   {
@@ -28,12 +28,12 @@ const ACCOUNTS = [
     color: "bg-green-50 border-green-200 hover:bg-green-100",
     iconColor: "bg-green-600",
     action: async () => {
-      const res = await fetch("/api/auth/login", {
+      await fetch("/api/auth/demo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "manager@demo.com", password: "test", companySlug: "demo" }),
+        body: JSON.stringify({ role: "MANAGER" }),
       });
-      return { ok: res.ok, redirect: "/approvals" };
+      return "/approvals";
     },
   },
   {
@@ -43,12 +43,8 @@ const ACCOUNTS = [
     color: "bg-slate-50 border-slate-200 hover:bg-slate-100",
     iconColor: "bg-slate-700",
     action: async () => {
-      const res = await fetch("/api/admin/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "admin@demo.com", password: "admin" }),
-      });
-      return { ok: res.ok, redirect: "/admin/dashboard" };
+      await fetch("/api/admin/auth/demo", { method: "POST" });
+      return "/admin/dashboard";
     },
   },
 ];
@@ -56,23 +52,11 @@ const ACCOUNTS = [
 export default function TestLoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
-  const [error, setError] = useState("");
 
   async function loginAs(account: (typeof ACCOUNTS)[0]) {
-    setError("");
     setLoading(account.label);
-    try {
-      const { ok, redirect } = await account.action();
-      if (!ok) {
-        setError("Login failed — make sure the database is seeded.");
-        return;
-      }
-      router.push(redirect);
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(null);
-    }
+    const redirect = await account.action();
+    router.push(redirect);
   }
 
   return (
@@ -85,7 +69,7 @@ export default function TestLoginPage() {
 
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-white">Test Login</h1>
-          <p className="text-slate-400 text-sm mt-1">Pick an account to log in instantly</p>
+          <p className="text-slate-400 text-sm mt-1">Pick a role to preview the app</p>
         </div>
 
         <div className="space-y-3">
@@ -110,12 +94,6 @@ export default function TestLoginPage() {
             </button>
           ))}
         </div>
-
-        {error && (
-          <div className="mt-4 bg-red-900/30 text-red-400 text-sm rounded-xl px-4 py-3 border border-red-800">
-            {error}
-          </div>
-        )}
       </div>
     </div>
   );

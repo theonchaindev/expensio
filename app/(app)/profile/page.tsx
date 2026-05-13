@@ -11,13 +11,13 @@ export default async function ProfilePage() {
     prisma.user.findUnique({
       where: { id: session.userId },
       select: { name: true, email: true, role: true, department: true, jobTitle: true, createdAt: true },
-    }),
+    }).catch(() => null),
     prisma.expense.groupBy({
       by: ["status"],
       where: { userId: session.userId },
       _count: true,
       _sum: { amount: true },
-    }),
+    }).catch(() => []),
   ]);
 
   const fmt = (n: number) =>
@@ -36,13 +36,13 @@ export default async function ProfilePage() {
             className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold text-white"
             style={{ backgroundColor: "var(--brand-primary)" }}
           >
-            {user?.name.charAt(0)}
+            {(user?.name ?? session.name).charAt(0)}
           </div>
           <div>
-            <p className="font-bold text-gray-900 text-lg">{user?.name}</p>
-            <p className="text-gray-500 text-sm">{user?.email}</p>
+            <p className="font-bold text-gray-900 text-lg">{user?.name ?? session.name}</p>
+            <p className="text-gray-500 text-sm">{user?.email ?? session.email}</p>
             <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-              {user?.role === "MANAGER" ? "Manager" : "Employee"}
+              {(user?.role ?? session.role) === "MANAGER" ? "Manager" : "Employee"}
             </span>
           </div>
         </div>

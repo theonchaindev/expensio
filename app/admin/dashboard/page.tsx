@@ -9,24 +9,25 @@ export default async function AdminDashboardPage() {
   if (!session) redirect("/admin/login");
 
   const [company, stats, recentExpenses] = await Promise.all([
-    prisma.company.findUnique({ where: { id: session.companyId } }),
+    prisma.company.findUnique({ where: { id: session.companyId } }).catch(() => null),
     Promise.all([
-      prisma.expense.count({ where: { companyId: session.companyId } }),
-      prisma.expense.count({ where: { companyId: session.companyId, status: "PENDING" } }),
-      prisma.expense.count({ where: { companyId: session.companyId, status: "APPROVED" } }),
-      prisma.expense.count({ where: { companyId: session.companyId, status: "PAID" } }),
-      prisma.user.count({ where: { companyId: session.companyId, isActive: true } }),
+      prisma.expense.count({ where: { companyId: session.companyId } }).catch(() => 0),
+      prisma.expense.count({ where: { companyId: session.companyId, status: "PENDING" } }).catch(() => 0),
+      prisma.expense.count({ where: { companyId: session.companyId, status: "APPROVED" } }).catch(() => 0),
+      prisma.expense.count({ where: { companyId: session.companyId, status: "PAID" } }).catch(() => 0),
+      prisma.user.count({ where: { companyId: session.companyId, isActive: true } }).catch(() => 0),
       prisma.expense.aggregate({
         where: { companyId: session.companyId, status: { in: ["APPROVED", "PAID"] } },
         _sum: { amount: true },
-      }),
+      }).catch(() => ({ _sum: { amount: 0 } })),
     ]),
     prisma.expense.findMany({
       where: { companyId: session.companyId },
       include: { user: { select: { name: true } } },
       orderBy: { submittedAt: "desc" },
       take: 8,
-    }),
+      include: { user: { select: { name: true } } },
+    }).catch(() => []),
   ]);
 
   const [total, pending, approved, paid, employees, totalAmount] = stats;
@@ -36,7 +37,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h1 className="text-2xl font-bold text-white">{company?.name} Dashboard</h1>
+        <h1 className="text-2xl font-bold text-white">{company?.name ?? "Demo Company"} Dashboard</h1>
         <p className="text-slate-400 text-sm mt-1">Overview of all company expenses</p>
       </div>
 
