@@ -5,13 +5,13 @@ import "./globals.css";
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Expensio",
-  description: "Company expense management",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Expensio" },
+  title: "Your Expenses",
+  description: "Company expense management by dbfb",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Your Expenses" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2563EB",
+  themeColor: "#EC5F5B",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

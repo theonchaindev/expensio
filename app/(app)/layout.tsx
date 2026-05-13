@@ -4,12 +4,12 @@ import { prisma } from "@/lib/prisma";
 import AppShell from "@/components/AppShell";
 
 const DEMO_THEME = {
-  primaryColor: "#2563EB",
-  secondaryColor: "#1E40AF",
-  accentColor: "#EFF6FF",
+  primaryColor: "#EC5F5B",
+  secondaryColor: "#d44f4c",
+  accentColor: "#FFF0EF",
   textOnPrimary: "#FFFFFF",
-  logoUrl: null as string | null,
-  companyName: "Demo Company",
+  logoUrl: "/dbfb-logo-white.svg" as string | null,
+  companyName: "Your Expenses",
 };
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {

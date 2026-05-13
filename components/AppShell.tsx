@@ -67,18 +67,20 @@ export default function AppShell({
           <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               {theme.logoUrl ? (
-                <img src={theme.logoUrl} alt={theme.companyName} className="h-8 w-auto object-contain" />
+                <img src={theme.logoUrl} alt={theme.companyName} className="h-7 w-auto object-contain" />
               ) : (
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
-                  style={{ backgroundColor: theme.secondaryColor, color: theme.textOnPrimary }}
-                >
-                  {theme.companyName.charAt(0)}
-                </div>
+                <>
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
+                    style={{ backgroundColor: theme.secondaryColor, color: theme.textOnPrimary }}
+                  >
+                    {theme.companyName.charAt(0)}
+                  </div>
+                  <span className="font-semibold text-sm" style={{ color: theme.textOnPrimary }}>
+                    {theme.companyName}
+                  </span>
+                </>
               )}
-              <span className="font-semibold text-sm" style={{ color: theme.textOnPrimary }}>
-                {theme.companyName}
-              </span>
             </div>
 
             <div className="flex items-center gap-3">

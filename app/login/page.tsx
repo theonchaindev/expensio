@@ -3,7 +3,8 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Receipt, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: "linear-gradient(135deg, #263469 0%, #1a2347 100%)" }}>
       <div className="w-full max-w-sm">
         <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 text-sm transition-colors">
           <ArrowLeft className="w-4 h-4" />
@@ -49,14 +50,14 @@ export default function LoginPage() {
         </Link>
 
         <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-              <Receipt className="w-5 h-5 text-white" />
+          <div className="mb-7">
+            <div className="flex items-center gap-2 mb-4">
+              <Image src="/dbfb-logo.svg" alt="dbfb" width={36} height={36} />
+              <div className="h-6 w-px bg-gray-200" />
+              <span className="font-bold text-gray-800 text-base">Your Expenses</span>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">Employee Login</h1>
-              <p className="text-xs text-gray-500">Sign in to manage your expenses</p>
-            </div>
+            <h1 className="text-lg font-bold text-gray-900">Employee Login</h1>
+            <p className="text-xs text-gray-500 mt-0.5">Sign in to manage your expenses</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -103,7 +104,8 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white font-semibold rounded-xl py-3 hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full font-semibold rounded-xl py-3 text-white transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: "#EC5F5B" }}
             >
               {loading ? "Signing in…" : "Sign In"}
             </button>

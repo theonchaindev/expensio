@@ -60,7 +60,7 @@ export default function TestLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: "linear-gradient(135deg, #263469 0%, #1a2347 100%)" }}>
       <div className="w-full max-w-sm">
         <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 text-sm transition-colors">
           <ArrowLeft className="w-4 h-4" />
@@ -69,7 +69,7 @@ export default function TestLoginPage() {
 
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-white">Test Login</h1>
-          <p className="text-slate-400 text-sm mt-1">Pick a role to preview the app</p>
+          <p className="text-slate-400 text-sm mt-1">Pick a role to preview <span style={{ color: "#EC5F5B" }}>Your Expenses</span></p>
         </div>
 
         <div className="space-y-3">
