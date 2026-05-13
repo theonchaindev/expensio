@@ -8,7 +8,7 @@ const DEMO_THEME = {
   secondaryColor: "#1E40AF",
   accentColor: "#EFF6FF",
   textOnPrimary: "#FFFFFF",
-  logoUrl: null,
+  logoUrl: null as string | null,
   companyName: "Demo Company",
 };
 
