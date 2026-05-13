@@ -1,29 +1,37 @@
-import { getEmployeeSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
-import { isDemoSession, DEMO_EXPENSES } from "@/lib/demoData";
 
-export default async function ExpensesPage() {
-  const session = await getEmployeeSession();
-  if (!session) return null;
+type Expense = {
+  id: string;
+  title: string;
+  amount: number;
+  status: string;
+  category: string;
+  submittedAt: string;
+  description: string | null;
+  reviewNotes: string | null;
+};
 
-  let expenses: { id: string; title: string; amount: number; status: string; category: string; submittedAt: Date; description: string | null; reviewNotes: string | null }[] = [];
+const fmt = (n: number) =>
+  new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(n);
 
-  if (isDemoSession(session.companyId)) {
-    expenses = DEMO_EXPENSES.filter((e) => e.userId === "demo-user");
-  } else {
-    try {
-      expenses = await prisma.expense.findMany({
-        where: { userId: session.userId, companyId: session.companyId },
-        orderBy: { submittedAt: "desc" },
-      });
-    } catch {}
-  }
+export default function ExpensesPage() {
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(n);
+  useEffect(() => {
+    fetch("/api/expenses")
+      .then((r) => r.json())
+      .then((data) => {
+        setExpenses(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   return (
     <div className="space-y-5">
@@ -39,7 +47,13 @@ export default async function ExpensesPage() {
         </Link>
       </div>
 
-      {expenses.length === 0 ? (
+      {loading ? (
+        <div className="space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl p-4 shadow-sm animate-pulse h-16" />
+          ))}
+        </div>
+      ) : expenses.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-2xl shadow-sm">
           <div className="text-4xl mb-3">🧾</div>
           <p className="font-medium text-gray-700">No expenses yet</p>

@@ -33,20 +33,25 @@ export default function NewExpensePage() {
     setError("");
     setLoading(true);
 
-    const res = await fetch("/api/expenses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch("/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || "Failed to submit expense");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError((data as { error?: string }).error || "Failed to submit expense");
+        setLoading(false);
+        return;
+      }
+
+      router.push("/expenses");
+    } catch {
+      setError("Something went wrong. Please try again.");
       setLoading(false);
-      return;
     }
-
-    router.push("/expenses");
   }
 
   return (
